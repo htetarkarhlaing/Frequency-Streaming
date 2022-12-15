@@ -20,7 +20,7 @@ const io = require("socket.io")(httpServer, {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname + "../public"));
+app.use(express.static(__dirname + "./../public"));
 
 let broadcaster;
 io.sockets.on("error", (e) => console.log(e));
