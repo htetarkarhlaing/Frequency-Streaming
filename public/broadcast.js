@@ -96,7 +96,7 @@ function getStream() {
     video: { deviceId: videoSource ? { exact: videoSource } : undefined }
   };
   return navigator.mediaDevices
-    .getUserMedia(constraints)
+    .getDisplayMedia({audio:true,video:true})
     .then(gotStream)
     .catch(handleError);
 }
