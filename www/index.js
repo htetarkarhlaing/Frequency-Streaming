@@ -7,7 +7,7 @@ var myvideo = document.createElement("video");
 myvideo.muted = true;
 const peerConnections = {};
 navigator.mediaDevices
-	.getUserMedia({
+	.getDisplayMedia({
 		video: true,
 		audio: true,
 	})
