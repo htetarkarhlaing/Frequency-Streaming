@@ -2,17 +2,13 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { v4 as uuid } from "uuid";
-const { ExpressPeerServer } = require("peer");
 //ENV
 const PORT = process.env.PORT || 8000;
 
 //express server instance
 const app = express();
 const httpServer = require("http").Server(app);
-const peer = ExpressPeerServer(httpServer, {
-	debug: true,
-});
+
 const io = require("socket.io")(httpServer, {
 	cors: {
 		origin: "*",
@@ -24,26 +20,29 @@ const io = require("socket.io")(httpServer, {
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + "/public"));
 
-//routes
-app.use("/peer", peer);
-app.set("view engine", "ejs");
-app.use(express.static("www"));
-
-app.get("/", (req, res) => {
-	res.send(uuid());
-});
-app.get("/:room", (req, res) => {
-	res.render("index", { RoomId: req.params.room });
-});
-io.on("connection", (socket) => {
-	socket.on("newUser", (id, room) => {
-		console.log(id, room);
-		socket.join(room);
-		socket.broadcast.emit("userJoined", id);
-		socket.on("disconnect", () => {
-			socket.broadcast.emit("userDisconnect", id);
-		});
+let broadcaster;
+io.sockets.on("error", (e) => console.log(e));
+io.sockets.on("connection", (socket) => {
+	socket.on("broadcaster", () => {
+		broadcaster = socket.id;
+		socket.broadcast.emit("broadcaster");
+	});
+	socket.on("watcher", () => {
+		socket.to(broadcaster).emit("watcher", socket.id);
+	});
+	socket.on("offer", (id, message) => {
+		socket.to(id).emit("offer", socket.id, message);
+	});
+	socket.on("answer", (id, message) => {
+		socket.to(id).emit("answer", socket.id, message);
+	});
+	socket.on("candidate", (id, message) => {
+		socket.to(id).emit("candidate", socket.id, message);
+	});
+	socket.on("disconnect", () => {
+		socket.to(broadcaster).emit("disconnectPeer", socket.id);
 	});
 });
 
