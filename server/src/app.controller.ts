@@ -11,7 +11,7 @@ export class AppController {
     return this.appService.getHello();
   }
 
-  @Get('/:fileName')
+  @Get('/public/:fileName')
   publicFileResolver(@Param('fileName') name: string, @Res() res: Response) {
     return res.sendFile(name, { root: `./public/` });
   }
