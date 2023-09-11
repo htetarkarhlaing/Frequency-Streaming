@@ -16,6 +16,9 @@ async function bootstrap() {
   });
   app.useGlobalFilters(new HttpResponseException());
   app.useGlobalPipes(new ValidationPipe());
+  app.setGlobalPrefix('api', {
+    exclude: ['/', '/public/:fileName', '/uploads/:fileName', 'health'],
+  });
   const config = new DocumentBuilder()
     .setTitle('Frequency Streaming')
     .setDescription('API description for Frequency Streaming Service')
