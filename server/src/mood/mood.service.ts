@@ -1,7 +1,7 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { Responser } from 'src/utils/Responser';
-import { Create } from './dto';
+import { MoodCreate } from './dto';
 
 @Injectable()
 export class MoodService {
@@ -28,7 +28,7 @@ export class MoodService {
     }
   }
 
-  async moodCreateService(data: Create, file: Express.Multer.File) {
+  async moodCreateService(data: MoodCreate, file: Express.Multer.File) {
     try {
       const { filename, path } = file;
       const createdMood = await this.prismaService.mood.create({

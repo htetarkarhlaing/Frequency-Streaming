@@ -10,7 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express/multer';
 import { ApiOperation, ApiTags, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { Create } from './dto';
+import { MoodCreate } from './dto';
 import { FileSizeValidationPipe } from '../utils/FileInterceptor';
 import { MoodService } from './mood.service';
 
@@ -28,7 +28,7 @@ export class MoodController {
   @ApiTags('Mood')
   @ApiBody({
     description: 'Create New Mood',
-    type: Create,
+    type: MoodCreate,
   })
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Create New Mood' })
@@ -47,7 +47,7 @@ export class MoodController {
     }),
   )
   async createNewMood(
-    @Body() body: Create,
+    @Body() body: MoodCreate,
     @UploadedFile(new FileSizeValidationPipe()) file: Express.Multer.File,
   ): Promise<any> {
     return this.moodService.moodCreateService(body, file);

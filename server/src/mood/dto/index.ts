@@ -1,7 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class Create {
+export class MoodCreate {
   @ApiProperty()
   @IsNotEmpty()
   name: string;
