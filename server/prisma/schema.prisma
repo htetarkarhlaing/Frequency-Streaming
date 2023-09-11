@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String @id @default(uuid()) @db.VarChar(255)
+  email        String @unique
+  password     String
+  refreshToken String
+  Status       Status @default(PENDING)
+
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  Profile            Profile?
+  Channel            Channel[]
+  Message            Message[]
+  ChannelParticipant ChannelParticipant[]
+}
+
+model Profile {
+  id      String  @id @default(uuid()) @db.VarChar(255)
+  name    String
+  bio     String?
+  userId  String  @unique
+  User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  imageId String?
+  Image   File?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  Status  Status  @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Mood {
+  id      String  @id @default(uuid()) @db.VarChar(255)
+  name    String
+  imageId String?
+  Image   File?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  Status  Status  @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Channel {
+  id          String  @id @default(uuid()) @db.VarChar(255)
+  name        String
+  coverId     String?
+  Cover       File?   @relation(fields: [coverId], references: [id], onDelete: SetNull)
+  createdById String
+  CreatedBy   User    @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  code        String  @unique
+  Status      Status  @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Message   Message[]
+}
+
+model Message {
+  id        String  @id @default(uuid()) @db.VarChar(255)
+  channelId String
+  Channel   Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  senderId  String?
+  Sender    User?   @relation(fields: [senderId], references: [id], onDelete: SetNull)
+  content   String  @db.LongText
+  Status    Status  @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ChannelParticipant {
+  id              String          @id @default(uuid()) @db.VarChar(255)
+  userId          String?
+  User            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ParticipantRole ParticipantRole @default(MEMBER)
+  Status          Status          @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model File {
+  id     String @id @default(uuid()) @db.VarChar(255)
+  name   String @unique
+  path   String
+  Status Status @default(ACTIVE)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Channel   Channel[]
+  Profile   Profile[]
+  Mood      Mood[]
+}
+
+enum Status {
+  ACTIVE
+  PENDING
+  DELETED
+}
+
+enum ParticipantRole {
+  ADMIN
+  MEMBER
+}
