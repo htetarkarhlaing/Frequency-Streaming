@@ -1,15 +1,22 @@
 import { HttpException } from '@nestjs/common';
 
-type responseInterface = {
+interface responseInterface {
   statusCode: number;
   message: string;
   body: any;
-};
+  devMessage?: string;
+}
 
-export const Responser = ({ statusCode, message, body }: responseInterface) => {
+export const Responser = ({
+  statusCode,
+  message,
+  devMessage,
+  body,
+}: responseInterface) => {
   return {
     meta: {
       success: statusCode >= 200 && statusCode <= 300 ? true : false,
+      devMessage: devMessage,
       message: message,
     },
     body: body,

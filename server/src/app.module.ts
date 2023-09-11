@@ -7,6 +7,7 @@ import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { MoodModule } from './mood/mood.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { UsersModule } from './users/users.module';
     HealthModule,
     AuthModule,
     UsersModule,
+    MoodModule,
   ],
   controllers: [AppController],
   providers: [AppService],
