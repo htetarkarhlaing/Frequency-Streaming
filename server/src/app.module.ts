@@ -5,6 +5,8 @@ import { AppService } from './app.service';
 import { PeerModule } from './peer/peer.module';
 import { EventsModule } from './events/events.module';
 import { HealthModule } from './health/health.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -12,6 +14,8 @@ import { HealthModule } from './health/health.module';
     PeerModule,
     EventsModule,
     HealthModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
