@@ -30,7 +30,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
         },
       },
       defaults: {
-        from: '"nest-modules" <modules@nestjs.com>',
+        from: '"Frequency Streaming" <stream.vamvamtech.com>',
       },
       template: {
         dir: __dirname + '/templates',
