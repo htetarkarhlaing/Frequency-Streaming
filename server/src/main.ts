@@ -8,9 +8,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const PORT = process.env.PORT || 8000;
-  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    // logger: false,
-  });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe());
   app.enableVersioning({
