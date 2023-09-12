@@ -9,6 +9,8 @@ import { AuthModule } from './auth/auth.module';
 import { MoodModule } from './mood/mood.module';
 import { UserModule } from './user/user.module';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 
 @Module({
   imports: [
@@ -19,6 +21,25 @@ import { ThrottlerModule } from '@nestjs/throttler';
         limit: parseInt(process.env.LIMIT) || 10,
       },
     ]),
+    MailerModule.forRoot({
+      transport: {
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER || '',
+          pass: process.env.GMAIL_PASS || '',
+        },
+      },
+      defaults: {
+        from: '"nest-modules" <modules@nestjs.com>',
+      },
+      template: {
+        dir: __dirname + '/templates',
+        adapter: new HandlebarsAdapter(),
+        options: {
+          strict: true,
+        },
+      },
+    }),
     PeerModule,
     EventsModule,
     HealthModule,
