@@ -30,6 +30,8 @@ model Profile {
   User    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   imageId String?
   Image   File?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
+  moodId  String?
+  Mood    Mood?   @relation(fields: [moodId], references: [id], onDelete: SetNull)
   Status  Status  @default(PENDING)
 
   createdAt DateTime @default(now())
@@ -43,8 +45,9 @@ model Mood {
   Image   File?   @relation(fields: [imageId], references: [id], onDelete: SetNull)
   Status  Status  @default(ACTIVE)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Profile   Profile[]
 }
 
 model Channel {
