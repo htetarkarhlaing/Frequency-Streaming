@@ -1,10 +1,11 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserCreate } from './dto';
+import { UserCreate, UserConfirm } from './dto';
 import { Responser } from 'src/utils/Responser';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
+import { hash } from 'argon2';
 
 @Injectable()
 export class UserService {
@@ -43,10 +44,10 @@ export class UserService {
         );
         await this.mailerService.sendMail({
           to: data.email,
-          subject: 'Testing Nest Mailermodule with template ✔',
+          subject: `Welcome ${data.name}, you're invited to join the Frequency Streaming`,
           template: 'register',
           context: {
-            subject: 'User register',
+            subject: `Welcome ${data.name}, you're invited to join the Frequency Streaming`,
             appURL: this.configService.get('APP_URL'),
             token: token,
           },
@@ -59,6 +60,60 @@ export class UserService {
           body: null,
         });
       }
+    } catch (err) {
+      throw new HttpException(
+        { message: 'Internal server error occurred', devMessage: err.message },
+        500,
+      );
+    }
+  }
+
+  async userAccountConfirm(data: UserConfirm) {
+    try {
+      await this.jwtService
+        .verifyAsync(data.token, {
+          secret: this.configService.get('JWT_REGISTER_SECRET'),
+        })
+        .then(async (userData: UserCreate) => {
+          try {
+            const createUser = await this.prismaService.user.create({
+              data: {
+                email: userData.email,
+                password: (await hash(data.password)).toString(),
+                refreshToken: '',
+                Status: 'ACTIVE',
+                Profile: {
+                  create: {
+                    name: userData.name,
+                  },
+                },
+              },
+            });
+            return Responser({
+              statusCode: 201,
+              message: 'User account created successfully.',
+              devMessage: 'user-account-created',
+              body: createUser,
+            });
+          } catch (err) {
+            throw new HttpException(
+              {
+                message: 'User account cannot create at this time.',
+                devMessage: err.message,
+              },
+              500,
+            );
+          }
+        })
+        .catch((err) => {
+          throw new HttpException(
+            {
+              message: 'Provided token is no longer valid.',
+              devMessage: err.message,
+            },
+            401,
+          );
+        });
     } catch (err) {
       throw new HttpException(
         { message: 'Internal server error occurred', devMessage: err.message },

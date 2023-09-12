@@ -1,7 +1,7 @@
-import { Body, Controller, Post, Get } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UserCreate } from './dto';
+import { UserCreate, UserConfirm } from './dto';
 
 @Controller('user')
 export class UserController {
@@ -16,5 +16,16 @@ export class UserController {
   @ApiOperation({ summary: 'User Register' })
   async createNewUser(@Body() body: UserCreate): Promise<any> {
     return this.userService.userInviteService(body);
+  }
+
+  @Post('confirm')
+  @ApiTags('User')
+  @ApiBody({
+    description: 'User Account Confirmation',
+    type: UserConfirm,
+  })
+  @ApiOperation({ summary: 'User Account Confirmation' })
+  async userConfirm(@Body() body: UserConfirm): Promise<any> {
+    return this.userService.userAccountConfirm(body);
   }
 }

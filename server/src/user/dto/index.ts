@@ -10,3 +10,13 @@ export class UserCreate {
   @IsNotEmpty()
   email: string;
 }
+
+export class UserConfirm {
+  @ApiProperty()
+  @IsNotEmpty()
+  token: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  password: string;
+}
