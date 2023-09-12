@@ -26,6 +26,7 @@ async function bootstrap() {
     .setTitle('Frequency Streaming')
     .setDescription('API description for Frequency Streaming Service')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('doc', app, document);
