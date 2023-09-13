@@ -1,7 +1,7 @@
 import axios from "axios";
 import { authJsonHeader, plainJsonHeader } from "../headers";
 
-const URL = import.meta.env.VITE_REACT_APP_BACKEND_SERVER;
+const URL = import.meta.env.VITE_BACKEND_URL;
 
 export const validateAccessToken = async (token: string) => {
 	return axios({
