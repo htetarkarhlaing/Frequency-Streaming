@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react"
 import Cookies from "js-cookie";
+import { Spinner } from "@nextui-org/react";
 import { login as ReduxLogin, logout as ReduxLogout } from "../store/reducers/auth.reducer"
 import { useAppDispatch, useAppSelector } from "../store"
 import { validateAccessToken as APIValidateAccessToken } from "../api/auth"
 import { ILogin } from "../@types/IAuthResponse"
+import Auth from "./Auth";
+import Guest from "./Guest";
 
 const Routes = () => {
     const dispatch = useAppDispatch();
@@ -62,6 +65,9 @@ const Routes = () => {
         if (tokens.accessToken !== "") {
             validateAccessToken(tokens.accessToken, tokens.refreshToken)
         }
+        else {
+            dispatch(ReduxLogout())
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [tokens.accessToken])
 
@@ -79,23 +85,17 @@ const Routes = () => {
     }
     else {
         if (authState.valid) {
-            return <AuthRoute />
+            return <Auth />
         }
         else {
-            return <GuestRoute />
+            return <Guest />
         }
     }
 }
 
-const AuthRoute = () => {
-    return <div>Auth</div>
-}
-
-const GuestRoute = () => {
-    return <div>UnAuth</div>
-}
-
 const Loading = () => {
-    return <div>Loading...</div>
+    return <div className="w-screen h-screen flex items-center justify-center">
+        <Spinner size="lg" />
+    </div>
 }
 export default Routes
