@@ -6,6 +6,7 @@ import { Responser } from 'src/utils/Responser';
 import { ConfigService } from '@nestjs/config';
 import { hash, verify } from 'argon2';
 import { IAuthRequest } from '../../@types/authRequest';
+import { Request } from 'express';
 
 @Injectable()
 export class AuthService {
@@ -167,6 +168,68 @@ export class AuthService {
         devMessage: 'user-me-info',
         body: userInfo,
       });
+    } catch (err) {
+      throw new HttpException(
+        { message: 'Internal server error occurred', devMessage: err.message },
+        500,
+      );
+    }
+  }
+
+  async userValidateRefreshToken(req: Request) {
+    try {
+      const refreshToken = req.headers.authorization.split(' ')[1];
+      if (refreshToken) {
+        try {
+          const decoded = await this.jwtService.verify(refreshToken, {
+            secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+          });
+          const validUser = await this.prismaService.user.findFirst({
+            where: {
+              id: decoded.id,
+            },
+          });
+          const refreshTokenMatch = await verify(
+            validUser.refreshToken,
+            refreshToken,
+          );
+          if (refreshTokenMatch) {
+            const tokens = await this.tokenGenerator(validUser.id);
+            await this.prismaService.user.update({
+              where: {
+                id: validUser.id,
+              },
+              data: {
+                refreshToken: (await hash(tokens.refreshToken)).toString(),
+              },
+            });
+            return Responser({
+              statusCode: 200,
+              message: 'User token refreshed successfully.',
+              devMessage: 'user-token-refresh-success',
+              body: tokens,
+            });
+          } else {
+            throw new HttpException(
+              {
+                message: 'Unauthorized',
+                devMessage: 'user-refresh-token-not-match',
+              },
+              401,
+            );
+          }
+        } catch (err) {
+          throw new HttpException(
+            { message: 'Unauthorized', devMessage: err },
+            401,
+          );
+        }
+      } else {
+        throw new HttpException(
+          { message: 'Unauthorized', devMessage: 'token-required' },
+          401,
+        );
+      }
     } catch (err) {
       throw new HttpException(
         { message: 'Internal server error occurred', devMessage: err.message },

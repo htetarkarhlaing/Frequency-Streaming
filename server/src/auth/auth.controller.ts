@@ -28,4 +28,13 @@ export class AuthController {
   async userRequestMe(@Req() req: IAuthRequest): Promise<any> {
     return this.authService.userRequestMe(req);
   }
+
+  @Get('refresh-tokens')
+  @ApiTags('Auth')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'User Revalidate Token' })
+  async userRefreshToken(@Req() req: IAuthRequest): Promise<any> {
+    return this.authService.userValidateRefreshToken(req);
+  }
 }
