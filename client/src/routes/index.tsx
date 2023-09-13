@@ -1,60 +1,84 @@
 import { useState, useEffect } from "react"
 import Cookies from "js-cookie";
-import axios from "axios";
+import { login as ReduxLogin, logout as ReduxLogout } from "../store/reducers/auth.reducer"
+import { useAppDispatch, useAppSelector } from "../store"
+import { validateAccessToken as APIValidateAccessToken } from "../api/auth"
+import { ILogin } from "../@types/IAuthResponse"
 
 const Routes = () => {
+    const dispatch = useAppDispatch();
 
-    const [token, setToken] = useState<string | null>(null);
-    const [authState, setAuthState] = useState({
-        isValidated: false,
-        isAuthenticated: false
+    const authState = useAppSelector(state => state.auth.value)
+    const [tokens, setTokens] = useState({
+        accessToken: "",
+        refreshToken: ""
     })
 
-    const cookieToken: string = Cookies.get("token") || "";
+    const cookieAccessToken = Cookies.get("accessToken") || "";
+    const cookieRefreshToken = Cookies.get("refreshToken") || "";
 
-    // * cookie buffer effect
-    useEffect(() => {
-        setToken(cookieToken)
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
-
-    // * validator effect
-    useEffect(() => {
-        if (token !== null && token === "") {
-            setAuthState({
-                isValidated: true,
-                isAuthenticated: false
-            })
-        }
-        else {
-            if (token && token !== "") {
-                tokenValidator(token)
+    // handlers
+    const validateAccessToken = async (accessToken: string, refreshToken: string) => {
+        APIValidateAccessToken(accessToken).then(res => {
+            if (res.status === 200) {
+                dispatch(ReduxLogin({
+                    user: {
+                        name: "",
+                        email: "",
+                        image: ""
+                    },
+                    status: true,
+                    token: "",
+                    valid: true
+                }))
             }
-        }
-    }, [token])
-
-    // * validation handler
-    const tokenValidator = (payload: string) => {
-        axios.get('', {
-            headers: {
-                Authorization: `Bearer ${payload}`
+            else {
+                validateRefreshToken(refreshToken)
             }
+        }).catch(err => {
+            dispatch(ReduxLogout())
+            console.log(err)
         })
-            .then(function (response) {
-                // handle success
-                console.log(response);
-            })
-            .catch(function (error) {
-                // handle error
-                console.log(error);
-            })
     }
 
-    if (!authState.isValidated) {
+    const validateRefreshToken = async (refreshToken: string) => {
+        APIValidateAccessToken(refreshToken).then(res => {
+            if (res.status === 200) {
+                const data: ILogin = res.data
+                Cookies.set("accessToken", data.body.accessToken)
+                Cookies.set("refreshToken", data.body.refreshToken)
+            }
+            else {
+                dispatch(ReduxLogout())
+            }
+        }).catch(err => {
+            dispatch(ReduxLogout())
+            console.log(err)
+        })
+    }
+
+    // effects
+    useEffect(() => {
+        if (tokens.accessToken !== "") {
+            validateAccessToken(tokens.accessToken, tokens.refreshToken)
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [tokens.accessToken])
+
+    useEffect(() => {
+        if (cookieAccessToken !== "" && cookieRefreshToken !== "") {
+            setTokens({
+                accessToken: cookieAccessToken,
+                refreshToken: cookieRefreshToken
+            })
+        }
+    }, [cookieAccessToken, cookieRefreshToken])
+
+    if (!authState.status) {
         return <Loading />
     }
     else {
-        if (authState.isAuthenticated) {
+        if (authState.valid) {
             return <AuthRoute />
         }
         else {
@@ -64,11 +88,11 @@ const Routes = () => {
 }
 
 const AuthRoute = () => {
-    return <div>Hello</div>
+    return <div>Auth</div>
 }
 
 const GuestRoute = () => {
-    return <div>Hello</div>
+    return <div>UnAuth</div>
 }
 
 const Loading = () => {
