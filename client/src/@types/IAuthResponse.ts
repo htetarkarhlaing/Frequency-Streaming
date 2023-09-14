@@ -18,7 +18,7 @@ interface MeBody {
 	id: string;
 	email: string;
 	status: string;
-	profile: Profile;
+	Profile: Profile;
 	channel: [];
 }
 

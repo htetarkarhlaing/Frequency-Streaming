@@ -9,11 +9,16 @@ import {
     Input,
     Tooltip,
 } from "@nextui-org/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { HiEye, HiEyeOff } from "react-icons/hi";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { login as ReduxLogin } from "../../store/reducers/auth.reducer"
+import { useAppDispatch } from "../../store"
+import { login as loginAPI, validateAccessToken as APIValidateAccessToken } from "../../api/auth"
+import { ILogin as IAuthType, IWhoAmI } from "../../@types/IAuthResponse"
+import Cookies from "js-cookie";
 
 interface ILogin {
     isOpen: boolean;
@@ -71,7 +76,10 @@ interface ILoginForm {
 }
 
 const LoginForm = ({ changePage }: ILoginForm) => {
+    const dispatch = useAppDispatch();
+    const cookieSafeInfo = Cookies.get("save-me")
     const [isVisible, setIsVisible] = useState(false);
+    const [saveInfo, setSaveInfo] = useState(false);
 
     const toggleVisibility = () => setIsVisible(!isVisible);
 
@@ -85,8 +93,54 @@ const LoginForm = ({ changePage }: ILoginForm) => {
     });
 
     const handleSubmitLogin = (data: ILoginFormProps) => {
-        console.log(data);
+        Cookies.set("save-me", saveInfo ? "true" : "false")
+        loginAPI({
+            email: data.email,
+            password: data.password
+        }).then(res => {
+            const response: IAuthType = res.data;
+            Cookies.set("accessToken", response.body.accessToken)
+            Cookies.set("refreshToken", saveInfo ? response.body.refreshToken : "")
+            validateAccessToken(response.body.accessToken)
+        })
+            .catch(err => {
+                console.log(err)
+            })
     };
+
+    const validateAccessToken = async (accessToken: string) => {
+        APIValidateAccessToken(accessToken).then(res => {
+            if (res.status === 200) {
+                const resData: IWhoAmI = res.data;
+                console.log(resData)
+                dispatch(ReduxLogin({
+                    user: {
+                        name: resData.body.Profile.name,
+                        email: resData.body.email,
+                        image: resData.body.Profile.image || ""
+                    },
+                    status: true,
+                    token: accessToken,
+                    valid: true
+                }))
+            }
+            else {
+                alert("not found")
+            }
+        }).catch(err => {
+            alert("err")
+            console.log(err)
+        })
+    }
+
+    useEffect(() => {
+        if (cookieSafeInfo === "true") {
+            setSaveInfo(true)
+        }
+        else {
+            setSaveInfo(false)
+        }
+    }, [cookieSafeInfo])
 
     return (
         <form onSubmit={handleSubmit(handleSubmitLogin)}>
@@ -131,6 +185,10 @@ const LoginForm = ({ changePage }: ILoginForm) => {
                                 <Checkbox
                                     classNames={{
                                         label: "text-small",
+                                    }}
+                                    checked={saveInfo}
+                                    onChange={() => {
+                                        setSaveInfo(!saveInfo)
                                     }}
                                 >
                                     Remember me
