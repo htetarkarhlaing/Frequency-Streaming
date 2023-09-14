@@ -2,7 +2,7 @@
   "name": "client",
   "author": "Htet Arkar Hlaing <htet.arkar.hlaing.official.mm@gmail.com>",
   "private": true,
-  "license": "CC-BY-4.0",
+  "license": "Apache-2.0 ",
   "version": "0.0.1",
   "type": "module",
   "scripts": {

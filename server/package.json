@@ -4,7 +4,7 @@
   "description": "",
   "author": "Htet Arkar Hlaing <htet.arkar.hlaing.official.mm@gmail.com>",
   "private": true,
-  "license": "CC-BY-4.0",
+  "license": "Apache-2.0",
   "prisma": {
     "seed": "ts-node prisma/seeder.ts"
   },
