@@ -1,7 +1,12 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserCreate, UserConfirm, UserForgotPassword } from './dto';
+import {
+  UserCreate,
+  UserConfirm,
+  UserForgotPassword,
+  UserConfirmNewPassword,
+} from './dto';
 import { Responser } from 'src/utils/Responser';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -168,6 +173,55 @@ export class UserService {
           body: null,
         });
       }
+    } catch (err) {
+      throw new HttpException(
+        { message: 'Internal server error occurred', devMessage: err.message },
+        500,
+      );
+    }
+  }
+
+  async userConfirmNewPasswordService(data: UserConfirmNewPassword) {
+    try {
+      await this.jwtService
+        .verifyAsync(data.token, {
+          secret: this.configService.get('JWT_PASSWORD_RESET_SECRET'),
+        })
+        .then(async (userData: { id: string }) => {
+          try {
+            const updatedUser = await this.prismaService.user.update({
+              where: {
+                id: userData.id,
+              },
+              data: {
+                password: (await hash(data.password)).toString(),
+              },
+            });
+            return Responser({
+              statusCode: 200,
+              message: 'User account password changed successfully.',
+              devMessage: 'user-account-password-changed',
+              body: updatedUser,
+            });
+          } catch (err) {
+            throw new HttpException(
+              {
+                message: 'User account password cannot change at this time.',
+                devMessage: err.message,
+              },
+              500,
+            );
+          }
+        })
+        .catch((err) => {
+          throw new HttpException(
+            {
+              message: 'Provided token is no longer valid.',
+              devMessage: err.message,
+            },
+            401,
+          );
+        });
     } catch (err) {
       throw new HttpException(
         { message: 'Internal server error occurred', devMessage: err.message },

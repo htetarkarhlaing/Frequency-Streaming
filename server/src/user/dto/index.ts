@@ -26,3 +26,13 @@ export class UserForgotPassword {
   @IsNotEmpty()
   email: string;
 }
+
+export class UserConfirmNewPassword {
+  @ApiProperty()
+  @IsNotEmpty()
+  token: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  password: string;
+}

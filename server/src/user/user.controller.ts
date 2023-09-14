@@ -1,7 +1,12 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags, ApiBody } from '@nestjs/swagger';
 import { UserService } from './user.service';
-import { UserCreate, UserConfirm, UserForgotPassword } from './dto';
+import {
+  UserCreate,
+  UserConfirm,
+  UserForgotPassword,
+  UserConfirmNewPassword,
+} from './dto';
 
 @Controller('user')
 export class UserController {
@@ -38,5 +43,18 @@ export class UserController {
   @ApiOperation({ summary: 'User Account Request Forgot Password Reset Link' })
   async userForgotPassword(@Body() body: UserForgotPassword): Promise<any> {
     return this.userService.userRequestPasswordResetService(body);
+  }
+
+  @Post('new-password-confirm')
+  @ApiTags('User')
+  @ApiBody({
+    description: 'User Account Update New Password',
+    type: UserConfirmNewPassword,
+  })
+  @ApiOperation({ summary: 'User Account Update New Password' })
+  async userUpdateNewResetPassword(
+    @Body() body: UserConfirmNewPassword,
+  ): Promise<any> {
+    return this.userService.userConfirmNewPasswordService(body);
   }
 }
