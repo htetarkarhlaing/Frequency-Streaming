@@ -20,3 +20,9 @@ export class UserConfirm {
   @IsNotEmpty()
   password: string;
 }
+
+export class UserForgotPassword {
+  @ApiProperty()
+  @IsNotEmpty()
+  email: string;
+}

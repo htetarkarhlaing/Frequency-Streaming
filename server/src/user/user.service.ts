@@ -1,7 +1,7 @@
 import { Injectable, HttpException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma.service';
 import { JwtService } from '@nestjs/jwt';
-import { UserCreate, UserConfirm } from './dto';
+import { UserCreate, UserConfirm, UserForgotPassword } from './dto';
 import { Responser } from 'src/utils/Responser';
 import { ConfigService } from '@nestjs/config';
 import { MailerService } from '@nestjs-modules/mailer';
@@ -114,6 +114,60 @@ export class UserService {
             401,
           );
         });
+    } catch (err) {
+      throw new HttpException(
+        { message: 'Internal server error occurred', devMessage: err.message },
+        500,
+      );
+    }
+  }
+
+  async userRequestPasswordResetService(data: UserForgotPassword) {
+    try {
+      const isUserExisting = await this.prismaService.user.findFirst({
+        where: {
+          email: data.email,
+        },
+        include: {
+          Profile: true,
+        },
+      });
+      if (!isUserExisting) {
+        throw new HttpException(
+          {
+            message: 'User with the provided email does not exists.',
+            devMessage: 'email-not-exist',
+          },
+          409,
+        );
+      } else {
+        const token = await this.jwtService.signAsync(
+          {
+            id: isUserExisting.id,
+          },
+          {
+            secret: this.configService.get('JWT_PASSWORD_RESET_SECRET'),
+            expiresIn: '4h',
+          },
+        );
+        await this.mailerService.sendMail({
+          to: data.email,
+          subject: `Welcome back ${isUserExisting.Profile.name}, here your password reset link`,
+          template: 'register',
+          context: {
+            subject: `Welcome back ${isUserExisting.Profile.name}, here your password reset link`,
+            appURL: this.configService.get('APP_URL'),
+            token: token,
+          },
+        });
+
+        return Responser({
+          statusCode: 200,
+          message: 'Password reset link is sent to your mail.',
+          devMessage: 'password-rest-link-send-success',
+          body: null,
+        });
+      }
     } catch (err) {
       throw new HttpException(
         { message: 'Internal server error occurred', devMessage: err.message },
