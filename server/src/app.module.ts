@@ -11,6 +11,7 @@ import { UserModule } from './user/user.module';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ChannelModule } from './channel/channel.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
     AuthModule,
     MoodModule,
     UserModule,
+    ChannelModule,
   ],
   controllers: [AppController],
   providers: [AppService],
