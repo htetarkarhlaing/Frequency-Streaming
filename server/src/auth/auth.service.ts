@@ -5,7 +5,7 @@ import { UserLogin } from './dto';
 import { Responser } from 'src/utils/Responser';
 import { ConfigService } from '@nestjs/config';
 import { hash, verify } from 'argon2';
-import { IAuthRequest } from '../../@types/authRequest';
+import { IAuthRequest } from 'src/@types/authRequest';
 import { Request } from 'express';
 
 @Injectable()
