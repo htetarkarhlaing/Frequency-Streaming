@@ -11,7 +11,7 @@ import { ApiOperation, ApiTags, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { MoodCreate } from './dto';
-import { FileSizeValidationPipe } from '../utils/FileInterceptor';
+import { FileSizeValidationPipe } from 'src/utils/FileInterceptor';
 import { MoodService } from './mood.service';
 
 @Controller('mood')
