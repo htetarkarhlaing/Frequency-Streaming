@@ -105,6 +105,9 @@ const Routes = () => {
                 refreshToken: cookieRefreshToken
             })
         }
+        else {
+            dispatch(ReduxLogout())
+        }
 
     }, [cookieAccessToken, cookieRefreshToken])
 
